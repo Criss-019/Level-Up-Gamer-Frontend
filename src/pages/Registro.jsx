@@ -67,7 +67,7 @@ function Registro() {
     return edadCalculada >= 18
   }
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
     setErrores({})
     setExito('')
@@ -106,7 +106,7 @@ function Registro() {
       return
     }
 
-    const respuesta = registrarUsuario({
+    const respuesta = await registrarUsuario({
       run: formData.run.trim() || undefined,
       nombre: formData.nombre.trim(),
       apellidos: formData.apellidos.trim() || undefined,

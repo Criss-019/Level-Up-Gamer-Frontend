@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { useCarrito } from '../context/CarritoContext'
+import api from '../js/api'
 import '../css/styles.css'
 import '../css/tienda.css'
 import Logo from '../assets/images/Logo.png'
@@ -13,8 +14,25 @@ function Productos() {
   const { agregarAlCarrito } = useCarrito()
 
   useEffect(() => {
-    const prods = JSON.parse(localStorage.getItem('productos')) || []
-    setProductos(prods.filter(p => p.activo))
+    const cargar = async () => {
+      try {
+        const res = await api.get('/productos')
+        if (res.data && Array.isArray(res.data) && res.data.length > 0) {
+          const prodsApi = res.data.map(p => ({
+            ...p,
+            categoria: p.categoriaNombre || p.categoria || 'Gamer',
+            activo: p.activo !== false
+          }))
+          setProductos(prodsApi.filter(p => p.activo))
+          return
+        }
+      } catch (err) {
+        console.warn("Cargando productos de contingencia local:", err.message)
+      }
+      const prods = JSON.parse(localStorage.getItem('productos')) || []
+      setProductos(prods.filter(p => p.activo !== false))
+    }
+    cargar()
   }, [])
 
   const formatearPrecio = (precio) => {

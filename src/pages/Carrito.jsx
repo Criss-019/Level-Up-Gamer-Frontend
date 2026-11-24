@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useCarrito } from '../context/CarritoContext'
 import { useAuth } from '../context/AuthContext'
+import api from '../js/api'
 import '../css/styles.css'
 import '../css/tienda.css'
 import Logo from '../assets/images/Logo.png'
@@ -25,13 +26,38 @@ function Carrito() {
     return new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP' }).format(precio)
   }
 
-  const finalizarCompra = () => {
+  const finalizarCompra = async () => {
     if (carrito.length === 0) return
 
-    const ordenId = `#LUG-${Math.floor(100000 + Math.random() * 900000)}`
+    let ordenId = `#LUG-${Math.floor(100000 + Math.random() * 900000)}`
+
+    // Sincronizar emisión de boleta con backend REST en Spring Boot
+    try {
+      const payloadBoleta = {
+        subtotal: subtotal,
+        descuento: descuento,
+        total: total,
+        usuarioId: usuario?.id || null,
+        items: carrito.map(item => ({
+          productoId: item.id || null,
+          productoCodigo: item.codigo,
+          productoNombre: item.nombre,
+          cantidad: item.cantidad,
+          precioUnitario: item.precio,
+          subtotal: item.precio * item.cantidad
+        }))
+      }
+      const res = await api.post('/boletas', payloadBoleta)
+      if (res.data && res.data.id) {
+        ordenId = `#BOL-00${res.data.id}`
+      }
+    } catch (apiErr) {
+      console.warn("Backend no disponible, registrando orden local:", apiErr.message)
+    }
+
     setOrdenGenerada(ordenId)
 
-    // Guardar en pedidos
+    // Guardar en pedidos locales
     const pedidos = JSON.parse(localStorage.getItem('pedidos')) || []
     pedidos.push({
       ordenId: ordenId,

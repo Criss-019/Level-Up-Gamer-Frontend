@@ -1,90 +1,90 @@
-# Level-Up Gamer
+# Level-Up Gamer - E-Commerce Integrado (Evaluación Parcial 3)
 
-Tienda online especializada en productos gamer, consolas, accesorios y juegos de mesa. Proyecto frontend desarrollado con **React**, **Vite** y **Bootstrap**, enfocado en componentes reutilizables, gestión de estado global y pruebas unitarias automatizadas.
-
----
-
-## Características Principales
-
-* **Catálogo Interactivo:** Búsqueda en tiempo real, filtro por categorías y filtro por rango de precios.
-* **Carrito de Compras:** Control de stock, cálculo de subtotal y aplicación automática de un **20% de descuento** para correos de Duoc UC (`@duoc.cl` / `@duocuc.cl`).
-* **Autenticación y Roles:** Registro de usuarios con validación de RUT chileno y mayoría de edad (+18 años), inicio de sesión y persistencia en `localStorage`.
-* **Panel de Administración:** Gestión de productos (CRUD), visualización de stock crítico, control de usuarios y respaldo de datos en formato JSON.
-* **Pruebas Unitarias:** 34 tests automatizados con **Vitest** y **React Testing Library** con 100% de éxito.
+Plataforma de comercio electrónico de productos gamer, videojuegos, accesorios y consolas. Sistema completamente integrado compuesto por un **Frontend React 19 + Vite** y un **Backend Spring Boot 3 (Java 21 LTS)** con base de datos relacional H2, seguridad basada en roles mediante **Spring Security + JWT** y documentación interactiva con **OpenAPI / Swagger**.
 
 ---
 
-## Requisitos del Sistema
+## 👥 Integrantes del Equipo (Duoc UC)
+* **Cristián Carvajal** - Desarrollador Fullstack
+* **Sebastián Castillo** - Desarrollador Fullstack
 
-Para ejecutar este proyecto necesitas tener instalado en tu computadora:
-
-* **Node.js:** Versión 18.x o superior (recomendado v20+ o v24+).
-* **NPM:** Versión 9.x o superior.
-* Un navegador web moderno (por ejemplo: Google Chrome, Microsoft Edge, Mozilla Firefox).
+**Repositorio Frontend:** https://github.com/Criss-019/Level-Up-Gamer.git  
+**Repositorio Backend:** https://github.com/Criss-019/Level-Up-Gamer-Backend.git  
 
 ---
 
-## Instrucciones de Instalación y Ejecución
+## 🚀 Arquitectura del Sistema
 
-Sigue estos pasos en la terminal para poner en marcha el proyecto:
+* **Frontend:** React 19, React Router v7, Bootstrap 5, Vite, Vitest. Cliente HTTP centralizado (`api.js`) con inyección de cabecera `Authorization: Bearer <token>`.
+* **Backend:** Spring Boot 3.4 / Java 21, Spring Data JPA, Spring Security, JJWT 0.12.6, Springdoc OpenAPI (Swagger UI).
+* **Base de Datos:** MySQL / MariaDB (`jdbc:mysql://localhost:3306/level_up_gamer_db`) con script relacional exportable (`schema.sql`).
+* **Modelo Relacional (5 tablas):** `USUARIO` $\rightarrow$ `BOLETA` $\rightarrow$ `DETALLE_BOLETA` $\leftarrow$ `PRODUCTO` $\leftarrow$ `CATEGORIA`.
 
-1. **Clonar el repositorio o abrir la carpeta del proyecto:**
+---
+
+## 🔐 Cuentas de Acceso y Roles
+
+El sistema implementa control de acceso basado en roles (RBAC) tanto en Backend como en Frontend:
+
+| Rol | Usuario / Correo | Contraseña | Vistas y Permisos Asociados |
+| :--- | :--- | :--- | :--- |
+| **Administrador** | `admin` / `admin@duoc.cl` | `admin123` | **Acceso total**: Dashboard, CRUD completo de Productos, Órdenes/Boletas, Gestión de Usuarios y Respaldos. |
+| **Vendedor** | `vendedor` / `vendedor@duoc.cl` | `vendedor123` | **Panel de Ventas**: Visualización y detalle de Productos/Stock, visualización y detalle de Órdenes y Boletas emitidas. Resto de módulos restringidos. |
+| **Cliente** | `cliente` / `juan.perez@gmail.com` | `user123` | **Tienda Pública**: Catálogo de productos, carrito de compras, emisión de boletas y gestión de perfil. |
+
+---
+
+## 🛠️ Puesta en Marcha
+
+### 1. Iniciar el Backend (Spring Boot 3 + MySQL)
+1. Asegurarse de tener el servicio MySQL iniciado (ej. mediante XAMPP en puerto 3306).
+2. Abrir terminal en la carpeta `level-up-gamer-backend`:
+   ```bash
+   cd "level-up-gamer-backend"
+   ```
+3. Ejecutar con Maven o mediante el JAR empaquetado:
+   ```bash
+   mvn spring-boot:run
+   # O directamente:
+   java -jar target/level-up-gamer-backend-0.0.1-SNAPSHOT.jar
+   ```
+4. El servidor iniciará en el puerto **8089**:
+   * **Swagger UI:** http://localhost:8089/swagger-ui/index.html
+   * **Base de Datos:** MySQL `level_up_gamer_db` en `localhost:3306` (Usuario: `root`, Contraseña: vacía)
+   * **Swagger UI:** http://localhost:8089/swagger-ui/index.html
+   * **Consola H2:** http://localhost:8089/h2-console *(JDBC URL: `jdbc:h2:mem:testdb`, Usuario: `sa`, Contraseña: vacía)*
+
+### 2. Iniciar el Frontend (React 19 + Vite)
+1. Abrir terminal en la carpeta `Level-Up Gamer`:
    ```bash
    cd "Level-Up Gamer"
-   ```
-
-2. **Instalar dependencias necesarias:**
-   ```bash
    npm install
-   ```
-
-3. **Iniciar el servidor de desarrollo:**
-   ```bash
    npm run dev
    ```
-
-4. **Abrir en el navegador:**
-   Haz clic en el enlace local que muestra la terminal (generalmente `http://localhost:5173`).
+2. Ingresar a `http://localhost:5173` en el navegador.
 
 ---
 
-## Pruebas Unitarias (Testing)
+## 📡 Endpoints Principales de la API REST (`/api/v1`)
 
-El proyecto incluye una batería completa de pruebas unitarias para validar componentes, formularios, contextos y cálculos del carrito:
-
-* **Ejecutar todas las pruebas una sola vez:**
-  ```bash
-  npm test -- --run
-  ```
-
-* **Ejecutar pruebas en modo observador:**
-  ```bash
-  npm test
-  ```
-
-* **Generar el informe de cobertura de código:**
-  ```bash
-  npm run test:coverage
-  ```
-  *(El reporte se genera en la carpeta `coverage/index.html`)*
-
----
-
-## Cuentas de Acceso para Pruebas
-
-El sistema cuenta con usuarios precargados en `localStorage` para evaluar las distintas funcionalidades:
-
-| Rol | Correo Electrónico | Contraseña | Permisos |
-| :--- | :--- | :--- | :--- |
-| **Administrador** | `admin@duoc.cl` | `admin123` | Acceso total al panel administrativo (`/admin`) |
-| **Cliente** | `juan.perez@gmail.com` | `user123` | Navegación, compra en tienda y perfil de usuario |
-
----
-
-## Estructura del Código Fuente (`src/`)
-
-* `src/components/`: Componentes reutilizables (Cabecera, Footers, Layout de Admin).
-* `src/context/`: Estado global de la aplicación (`AuthContext` y `CarritoContext`).
-* `src/pages/`: Vistas públicas (Home, Catálogo, Detalle, Carrito, Login, Registro, etc.).
-* `src/pages/admin/`: Vistas privadas del panel de administración (Dashboard, Productos, Usuarios, Respaldos).
-* `src/js/data.js`: Fuente de datos simulada y precarga en `localStorage`.
+* **Autenticación:**
+  * `POST /api/v1/auth/login`: Autentica credenciales y emite token JWT con roles.
+  * `POST /api/v1/auth/registro`: Registro de nuevos clientes.
+  * `GET /api/v1/auth/me`: Perfil del usuario autenticado.
+* **Productos:**
+  * `GET /api/v1/productos`: Consulta pública del catálogo (abierta a clientes, vendedores y administradores).
+  * `GET /api/v1/productos/{id}`: Detalle de producto específico.
+  * `POST /api/v1/productos`: Creación de producto (*Solo Admin*).
+  * `PUT /api/v1/productos/{id}`: Actualización de producto (*Solo Admin*).
+  * `DELETE /api/v1/productos/{id}`: Eliminación de producto (*Solo Admin*).
+* **Categorías:**
+  * `GET /api/v1/categorias`: Listar categorías.
+  * `POST /api/v1/categorias`: Crear categoría (*Solo Admin*).
+* **Boletas y Órdenes:**
+  * `POST /api/v1/boletas`: Emitir compra, descontar stock de inventario y registrar boleta.
+  * `GET /api/v1/boletas`: Listar boletas (*Admin* y *Vendedor* ven todas; *Cliente* ve solo sus órdenes).
+  * `GET /api/v1/boletas/{id}`: Detalle de boleta con desglose de productos.
+* **Usuarios:**
+  * `GET /api/v1/usuarios`: Lista de usuarios registrados (*Solo Admin*).
+  * `PUT /api/v1/usuarios/{id}`: Modificación de datos y roles (*Solo Admin*).
+  * `DELETE /api/v1/usuarios/{id}`: Baja de usuario (*Solo Admin*).

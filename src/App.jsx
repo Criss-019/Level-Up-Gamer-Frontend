@@ -23,6 +23,7 @@ import Cuenta from './pages/Cuenta'
 // Páginas de Administración
 import AdminDashboard from './pages/admin/AdminDashboard'
 import AdminProductos from './pages/admin/AdminProductos'
+import AdminOrdenes from './pages/admin/AdminOrdenes'
 import AdminUsuarios from './pages/admin/AdminUsuarios'
 import AdminRespaldos from './pages/admin/AdminRespaldos'
 
@@ -78,6 +79,8 @@ function App() {
         <Route path="/admin/index.html" element={<AdminDashboard />} />
         <Route path="/admin/productos" element={<AdminProductos />} />
         <Route path="/admin/productos.html" element={<AdminProductos />} />
+        <Route path="/admin/ordenes" element={<AdminOrdenes />} />
+        <Route path="/admin/ordenes.html" element={<AdminOrdenes />} />
         <Route path="/admin/usuarios" element={<AdminUsuarios />} />
         <Route path="/admin/usuarios.html" element={<AdminUsuarios />} />
         <Route path="/admin/respaldos" element={<AdminRespaldos />} />

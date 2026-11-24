@@ -90,6 +90,13 @@ function Cabecera() {
                     </Link>
                   </li>
                 )}
+                {usuario.tipoUsuario === 'Vendedor' && (
+                  <li className="nav-item">
+                    <Link className="nav-link text-info fw-bold" to="/admin/productos">
+                      <i className="bi bi-bag-check-fill"></i> Panel Ventas
+                    </Link>
+                  </li>
+                )}
                 <li className="nav-item">
                   <Link className="nav-link text-light" to="/cuenta">
                     <i className="bi bi-person-circle"></i> Hola, {usuario.nombre}

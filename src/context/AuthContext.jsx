@@ -1,17 +1,17 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { USUARIOS_INICIALES } from "../js/data";
+import api from "../js/api";
 
 const AuthContext = createContext(null);
 
 export const AuthProvider = ({ children }) => {
-  // 1. Cargar usuarios guardados en localStorage
+  // 1. Cargar usuarios guardados en localStorage (con fallback)
   const [usuariosBD, setUsuariosBD] = useState(() => {
     try {
       const guardados = localStorage.getItem("usuarios");
       if (guardados) {
         return JSON.parse(guardados);
       }
-      // Inicializar con usuarios iniciales si no existen
       localStorage.setItem("usuarios", JSON.stringify(USUARIOS_INICIALES));
       return USUARIOS_INICIALES;
     } catch (error) {
@@ -20,7 +20,16 @@ export const AuthProvider = ({ children }) => {
     }
   });
 
-  // 2. Cargar la sesión actual desde localStorage (compatible con usuarioSesion y usuarioActual)
+  // 2. Token JWT
+  const [token, setToken] = useState(() => {
+    try {
+      return localStorage.getItem("token") || "";
+    } catch {
+      return "";
+    }
+  });
+
+  // 3. Cargar la sesión actual desde localStorage (persistencia ante recargas de página)
   const [usuario, setUsuario] = useState(() => {
     try {
       const sesion = localStorage.getItem("usuarioSesion") || localStorage.getItem("usuarioActual");
@@ -42,7 +51,7 @@ export const AuthProvider = ({ children }) => {
     }
   }, [usuariosBD]);
 
-  // Sincronizar Sesión activa con localStorage (ambas llaves para compatibilidad total)
+  // Sincronizar Sesión activa y Token con localStorage
   useEffect(() => {
     if (usuario) {
       try {
@@ -57,8 +66,23 @@ export const AuthProvider = ({ children }) => {
     }
   }, [usuario]);
 
-  // Registrar usuario (Compatible con formato reducido y formato completo con RUN/dirección)
-  const registrarUsuario = (datos) => {
+  useEffect(() => {
+    if (token) {
+      localStorage.setItem("token", token);
+    } else {
+      localStorage.removeItem("token");
+    }
+  }, [token]);
+
+  // Mapear rol de Spring Security a nombre legible del frontend
+  const normalizarRol = (rolBackend) => {
+    if (rolBackend === "ROLE_ADMIN" || rolBackend === "Administrador") return "Administrador";
+    if (rolBackend === "ROLE_VENDEDOR" || rolBackend === "Vendedor") return "Vendedor";
+    return "Cliente";
+  };
+
+  // Registrar usuario (Conecta con API Backend Spring Boot + Fallback local)
+  const registrarUsuario = async (datos) => {
     const {
       run = "",
       nombre = "",
@@ -76,7 +100,7 @@ export const AuthProvider = ({ children }) => {
 
     const emailPrincipal = (email || correo || "").trim().toLowerCase();
 
-    // Registro solo para mayores de 18 años
+    // Validación de edad mínima
     if (Number(edad) < 18) {
       return {
         ok: false,
@@ -84,7 +108,27 @@ export const AuthProvider = ({ children }) => {
       };
     }
 
-    // Verificar si el correo ya existe
+    // Intentar registrar en Backend REST
+    try {
+      const resp = await api.post("/auth/registro", {
+        run: run || `R${Date.now().toString().slice(-8)}`,
+        nombre: nombre.trim(),
+        apellidos: apellidos.trim(),
+        email: emailPrincipal,
+        username: emailPrincipal,
+        password,
+        fechaNacimiento,
+        region,
+        comuna,
+        direccion,
+        referido
+      });
+      console.log("Registro exitoso en Backend REST:", resp.data);
+    } catch (apiError) {
+      console.warn("Backend no disponible o error en registro API, continuando con almacenamiento local:", apiError.message);
+    }
+
+    // Verificar en BD local
     const existe = usuariosBD.some(
       (u) => (u.email || u.correo || "").toLowerCase() === emailPrincipal
     );
@@ -93,7 +137,6 @@ export const AuthProvider = ({ children }) => {
       return { ok: false, msj: "El correo electrónico ya está registrado." };
     }
 
-    // Identificación de correos Duoc para 20% OFF de por vida
     const esDuoc =
       emailPrincipal.endsWith("@duocuc.cl") ||
       emailPrincipal.endsWith("@profesor.duoc.cl") ||
@@ -129,18 +172,58 @@ export const AuthProvider = ({ children }) => {
     };
   };
 
-  // Iniciar sesión
-  const iniciarSesion = (emailOcorreo, password) => {
-    const emailLimpio = (emailOcorreo || "").trim().toLowerCase();
+  // Iniciar sesión con JWT y Spring Security
+  const iniciarSesion = async (emailOcorreo, password) => {
+    const credencialLimpia = (emailOcorreo || "").trim().toLowerCase();
 
+    // 1. Intentar autenticar contra el Backend en Spring Boot
+    try {
+      const res = await api.post("/auth/login", {
+        username: credencialLimpia,
+        password: password
+      });
+
+      if (res.data && res.data.token) {
+        const tokenRecibido = res.data.token;
+        setToken(tokenRecibido);
+        localStorage.setItem("token", tokenRecibido);
+
+        const tipoUsuarioNormalizado = normalizarRol(res.data.rol);
+        const usuarioSesion = {
+          id: res.data.id,
+          username: res.data.username || credencialLimpia,
+          nombre: res.data.nombre || res.data.username || "Usuario",
+          apellidos: res.data.apellidos || "",
+          email: res.data.email || credencialLimpia,
+          correo: res.data.email || credencialLimpia,
+          tipoUsuario: tipoUsuarioNormalizado,
+          puntos: res.data.puntos ?? 50,
+          puntosLevelUp: res.data.puntos ?? 50,
+          esDuoc: res.data.esDuoc ?? false,
+          descuentoDuoc: res.data.esDuoc ?? false,
+          token: tokenRecibido
+        };
+
+        setUsuario(usuarioSesion);
+        return {
+          ok: true,
+          msj: `¡Bienvenido ${usuarioSesion.nombre}! (Sesión JWT iniciada)`,
+          usuario: usuarioSesion
+        };
+      }
+    } catch (apiError) {
+      console.warn("Fallo en login API Spring Boot, verificando almacenamiento local:", apiError.message);
+    }
+
+    // 2. Fallback de contingencia local si el backend no está iniciado
     const usuarioExiste = usuariosBD.find(
-      (u) => (u.email || u.correo || "").toLowerCase() === emailLimpio
+      (u) => (u.email || u.correo || u.username || "").toLowerCase() === credencialLimpia
     );
 
     if (!usuarioExiste) {
       return {
         ok: false,
-        msj: "El correo electrónico no está registrado. Por favor regístrate.",
+        msj: "El correo o usuario no está registrado. Por favor regístrate.",
       };
     }
 
@@ -158,9 +241,9 @@ export const AuthProvider = ({ children }) => {
       };
     }
 
-    // Asegurar compatibilidad de campos normalizados
     const usuarioNormalizado = {
       ...usuarioExiste,
+      tipoUsuario: normalizarRol(usuarioExiste.tipoUsuario),
       email: usuarioExiste.email || usuarioExiste.correo,
       correo: usuarioExiste.correo || usuarioExiste.email,
       puntos: usuarioExiste.puntos ?? usuarioExiste.puntosLevelUp ?? 0,
@@ -180,6 +263,8 @@ export const AuthProvider = ({ children }) => {
   // Cerrar sesión
   const cerrarSesion = () => {
     setUsuario(null);
+    setToken("");
+    localStorage.removeItem("token");
     localStorage.removeItem("usuarioSesion");
     localStorage.removeItem("usuarioActual");
     setMostrarModalSalir(false);
@@ -224,11 +309,19 @@ export const AuthProvider = ({ children }) => {
     return { ok: true, msj: `¡Has acumulado ${puntosASumar} puntos LevelUp!` };
   };
 
+  const esAdmin = usuario?.tipoUsuario === "Administrador";
+  const esVendedor = usuario?.tipoUsuario === "Vendedor";
+  const esCliente = !esAdmin && !esVendedor;
+
   return (
     <AuthContext.Provider
       value={{
         usuario,
+        token,
         usuariosBD,
+        esAdmin,
+        esVendedor,
+        esCliente,
         registrarUsuario,
         iniciarSesion,
         cerrarSesion,

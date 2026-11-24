@@ -18,12 +18,12 @@ function Login() {
     return dominiosPermitidos.some(d => email.toLowerCase().endsWith(d))
   }
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
     const err = {}
 
     if (!correo.trim()) {
-      err.correo = 'El correo electrónico es requerido.'
+      err.correo = 'El correo o usuario es requerido.'
     }
 
     if (!password) {
@@ -35,20 +35,22 @@ function Login() {
       return
     }
 
-    // Iniciar sesión mediante AuthContext
-    const resultado = iniciarSesion(correo, password)
+    // Iniciar sesión mediante AuthContext (REST API con JWT + fallback)
+    const resultado = await iniciarSesion(correo, password)
     const esExitoso = typeof resultado === 'object' ? resultado?.ok : Boolean(resultado)
 
     if (esExitoso) {
       const usuarioLogueado = resultado?.usuario
       if (usuarioLogueado?.tipoUsuario === 'Administrador') {
         navigate('/admin')
+      } else if (usuarioLogueado?.tipoUsuario === 'Vendedor') {
+        navigate('/admin/productos')
       } else {
         navigate('/')
       }
     } else {
       const msj = (typeof resultado === 'object' && resultado?.msj) ||
-        'credenciales incorrectas. revisa tu correo o contraseña.'
+        'Credenciales incorrectas. Revisa tu usuario/correo o contraseña.'
       setErrores({ general: msj })
     }
   }
