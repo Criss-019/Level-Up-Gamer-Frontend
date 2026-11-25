@@ -42,12 +42,12 @@ describe('Contexto AuthContext', () => {
     expect(screen.getByTestId('usuario-estado')).toHaveTextContent('Sin Sesión');
   });
 
-  test('3. Permite iniciar sesión con credenciales válidas y cerrar sesión', () => {
+  test('3. Permite iniciar sesión con credenciales válidas y cerrar sesión', async () => {
     const wrapper = ({ children }) => <AuthProvider>{children}</AuthProvider>;
     const { result } = renderHook(() => useAuth(), { wrapper });
 
-    act(() => {
-      const loginRes = result.current.iniciarSesion('admin@duoc.cl', 'admin123');
+    await act(async () => {
+      const loginRes = await result.current.iniciarSesion('admin@duoc.cl', 'admin123');
       expect(loginRes.ok).toBe(true);
     });
 
@@ -61,13 +61,13 @@ describe('Contexto AuthContext', () => {
     expect(result.current.usuario).toBeNull();
   });
 
-  test('4. Registra un nuevo usuario con éxito y calcula descuento si es de Duoc', () => {
+  test('4. Registra un nuevo usuario con éxito y calcula descuento si es de Duoc', async () => {
     const wrapper = ({ children }) => <AuthProvider>{children}</AuthProvider>;
     const { result } = renderHook(() => useAuth(), { wrapper });
 
     let registroRes;
-    act(() => {
-      registroRes = result.current.registrarUsuario({
+    await act(async () => {
+      registroRes = await result.current.registrarUsuario({
         nombre: 'Gamer Nuevo',
         email: 'gamer@duocuc.cl',
         edad: 20,

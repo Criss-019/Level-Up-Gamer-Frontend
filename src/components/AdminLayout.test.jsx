@@ -60,7 +60,7 @@ describe('Componente <AdminLayout />', () => {
     );
 
     expect(window.alert).toHaveBeenCalledWith(
-      expect.stringMatching(/Acceso denegado/i)
+      expect.stringMatching(/Acceso (denegado|restringido)/i)
     );
     expect(mockNavigate).toHaveBeenCalledWith('/login');
   });

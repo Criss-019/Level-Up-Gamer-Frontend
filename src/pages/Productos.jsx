@@ -1,10 +1,9 @@
 import { useState, useEffect } from 'react'
-import { Link } from 'react-router-dom'
 import { useCarrito } from '../context/CarritoContext'
+import ProductoCard from '../components/ProductoCard'
 import api from '../js/api'
 import '../css/styles.css'
 import '../css/tienda.css'
-import Logo from '../assets/images/Logo.png'
 
 function Productos() {
   const [productos, setProductos] = useState([])
@@ -143,63 +142,13 @@ function Productos() {
                 <h4 className="text-secondary">No se encontraron productos con los criterios seleccionados.</h4>
               </div>
             ) : (
-              productosFiltrados.map((prod) => {
-                let badgeStock = null
-                if (prod.stock === 0) {
-                  badgeStock = (
-                    <span className="badge bg-danger position-absolute top-0 end-0 m-2">Agotado</span>
-                  )
-                } else if (prod.stock <= prod.stockCritico) {
-                  badgeStock = (
-                    <span className="badge stock-critico-badge position-absolute top-0 end-0 m-2">
-                      Stock Crítico ({prod.stock})
-                    </span>
-                  )
-                }
-
-                return (
-                  <div key={prod.codigo} className="col-12 col-sm-6 col-md-4 col-lg-4 mb-4">
-                    <div className="card card-gamer h-100 position-relative">
-                      {badgeStock}
-                      <div className="product-img-container">
-                        <img
-                          src={Logo}
-                          alt={prod.nombre}
-                          onError={(e) => { e.target.src = Logo }}
-                        />
-                      </div>
-                      <div className="card-body d-flex flex-column">
-                        <span className="badge bg-secondary mb-2 align-self-start">{prod.categoria}</span>
-                        <h5 className="card-title brand-font text-truncate" title={prod.nombre}>
-                          {prod.nombre}
-                        </h5>
-                        <p className="card-text text-muted small text-truncate-2 flex-grow-1">
-                          {prod.descripcion}
-                        </p>
-                        <div className="d-flex justify-content-between align-items-center mt-3">
-                          <span className="precio-tag">{formatearPrecio(prod.precio)}</span>
-                          <small className="text-light">Stock: {prod.stock}</small>
-                        </div>
-                        <div className="mt-3 d-grid gap-2">
-                          <Link
-                            to={`/detalle-producto?codigo=${prod.codigo}`}
-                            className="btn btn-outline-electric btn-sm"
-                          >
-                            Ver Detalle
-                          </Link>
-                          <button
-                            onClick={() => agregarAlCarrito(prod)}
-                            className="btn btn-neon btn-sm"
-                            disabled={prod.stock === 0}
-                          >
-                            <i className="bi bi-cart-plus"></i> Añadir al Carrito
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                )
-              })
+              productosFiltrados.map((prod) => (
+                <ProductoCard
+                  key={prod.codigo}
+                  producto={prod}
+                  onAgregar={agregarAlCarrito}
+                />
+              ))
             )}
           </div>
         </div>

@@ -9,12 +9,15 @@ function AdminLayout({ children, activeTab }) {
   const navigate = useNavigate()
   const { usuario, esAdmin, esVendedor, cerrarSesion } = useAuth()
 
+  const adminActivo = esAdmin ?? (usuario?.tipoUsuario === 'Administrador')
+  const vendedorActivo = esVendedor ?? (usuario?.tipoUsuario === 'Vendedor')
+
   useEffect(() => {
-    if (!usuario || (!esAdmin && !esVendedor)) {
+    if (!usuario || (!adminActivo && !vendedorActivo)) {
       alert('Acceso restringido. Se requieren permisos de Administrador o Vendedor para acceder a este panel.')
       navigate('/login')
     }
-  }, [usuario, esAdmin, esVendedor, navigate])
+  }, [usuario, adminActivo, vendedorActivo, navigate])
 
   const handleCerrarSesion = () => {
     cerrarSesion()
@@ -22,15 +25,15 @@ function AdminLayout({ children, activeTab }) {
     navigate('/')
   }
 
-  const tituloPanel = esVendedor ? 'PANEL DE VENTAS' : 'PANEL ADMINISTRATIVO'
-  const subTitulo = esVendedor ? 'Vendedor' : 'Administrador'
+  const tituloPanel = vendedorActivo && !adminActivo ? 'PANEL DE VENTAS' : 'PANEL ADMINISTRATIVO'
+  const subTitulo = vendedorActivo && !adminActivo ? 'Vendedor' : 'Administrador'
 
   return (
     <div>
       {/* BARRA DE NAVEGACIÓN SUPERIOR DE ADMIN / VENTAS */}
       <nav className="navbar navbar-expand-lg navbar-dark bg-dark border-bottom border-primary px-3">
         <div className="container-fluid">
-          <Link className="navbar-brand d-flex align-items-center gap-2" to={esVendedor ? "/admin/productos" : "/admin"}>
+          <Link className="navbar-brand d-flex align-items-center gap-2" to={vendedorActivo && !adminActivo ? "/admin/productos" : "/admin"}>
             <img src={Logo} alt="Logo" style={{ height: '35px' }} />
             <span className="brand-font fs-5 text-light">
               {tituloPanel} <span className="text-neon">({subTitulo})</span>
@@ -54,11 +57,11 @@ function AdminLayout({ children, activeTab }) {
       <div className="admin-wrapper">
         <aside className="admin-sidebar">
           <h6 className="brand-font text-muted mb-3 px-2">
-            {esVendedor ? 'GESTIÓN VENTAS' : 'MENÚ PRINCIPAL'}
+            {vendedorActivo && !adminActivo ? 'GESTIÓN VENTAS' : 'MENÚ PRINCIPAL'}
           </h6>
           <ul className="nav flex-column">
             {/* Solo Administrador tiene acceso al Dashboard general */}
-            {esAdmin && (
+            {adminActivo && (
               <li className="nav-item">
                 <Link className={`nav-link ${activeTab === 'dashboard' ? 'active' : ''}`} to="/admin">
                   <i className="bi bi-speedometer2"></i> Dashboard
@@ -81,7 +84,7 @@ function AdminLayout({ children, activeTab }) {
             </li>
 
             {/* Solo Administrador tiene acceso a Gestión de Usuarios y Respaldos */}
-            {esAdmin && (
+            {adminActivo && (
               <>
                 <li className="nav-item">
                   <Link className={`nav-link ${activeTab === 'usuarios' ? 'active' : ''}`} to="/admin/usuarios">

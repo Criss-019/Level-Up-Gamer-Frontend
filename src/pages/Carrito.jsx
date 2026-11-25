@@ -2,10 +2,10 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useCarrito } from '../context/CarritoContext'
 import { useAuth } from '../context/AuthContext'
+import ItemCarrito from '../components/ItemCarrito'
 import api from '../js/api'
 import '../css/styles.css'
 import '../css/tienda.css'
-import Logo from '../assets/images/Logo.png'
 
 function Carrito() {
   const {
@@ -101,59 +101,14 @@ function Carrito() {
               </div>
             </div>
           ) : (
-            carrito.map(item => {
-              const itemId = item.codigo || item.id || item.idProducto
-              return (
-                <div key={itemId} className="card card-gamer p-3 mb-3">
-                  <div className="row align-items-center">
-                    <div className="col-3 col-md-2 text-center">
-                      <img
-                        src={Logo}
-                        alt={item.nombre}
-                        className="img-fluid rounded"
-                        style={{ maxHeight: '70px', objectFit: 'contain' }}
-                        onError={(e) => { e.target.src = Logo }}
-                      />
-                    </div>
-                    <div className="col-9 col-md-4">
-                      <h6 className="brand-font text-light mb-1">{item.nombre}</h6>
-                      <small className="text-muted">Código: {itemId}</small>
-                      <div className="precio-tag d-md-none mt-1">{formatearPrecio(item.precio)}</div>
-                    </div>
-                    <div className="col-6 col-md-3 mt-2 mt-md-0 d-flex align-items-center gap-2">
-                      <button
-                        onClick={() => cambiarCantidad(itemId, -1)}
-                        className="btn btn-outline-secondary btn-sm"
-                        aria-label={`Disminuir ${item.nombre}`}
-                      >
-                        -
-                      </button>
-                      <span className="text-light fw-bold px-2">{item.cantidad}</span>
-                      <button
-                        onClick={() => cambiarCantidad(itemId, 1)}
-                        className="btn btn-outline-secondary btn-sm"
-                        aria-label={`Aumentar ${item.nombre}`}
-                      >
-                        +
-                      </button>
-                    </div>
-                    <div className="col-4 col-md-2 text-end d-none d-md-block">
-                      <span className="precio-tag">{formatearPrecio(item.precio * item.cantidad)}</span>
-                    </div>
-                    <div className="col-2 col-md-1 text-end">
-                      <button
-                        onClick={() => eliminarDelCarrito(itemId)}
-                        className="btn btn-outline-danger btn-sm"
-                        title="Eliminar"
-                        aria-label={`Eliminar ${item.nombre}`}
-                      >
-                        <i className="bi bi-trash"></i>
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              )
-            })
+            carrito.map(item => (
+              <ItemCarrito
+                key={item.codigo || item.id || item.idProducto}
+                item={item}
+                onCambiarCantidad={cambiarCantidad}
+                onEliminar={eliminarDelCarrito}
+              />
+            ))
           )}
         </div>
 
