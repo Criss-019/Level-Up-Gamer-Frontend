@@ -1,12 +1,12 @@
-# Level-Up Gamer - E-Commerce Integrado (Evaluación Parcial 3)
+# Level-Up Gamer - E-Commerce Integrado
 
-Plataforma de comercio electrónico de productos gamer, videojuegos, accesorios y consolas. Sistema completamente integrado compuesto por un **Frontend React 19 + Vite** y un **Backend Spring Boot 3 (Java 21 LTS)** con base de datos relacional H2, seguridad basada en roles mediante **Spring Security + JWT** y documentación interactiva con **OpenAPI / Swagger**.
+Plataforma de comercio electrónico de productos gamer, videojuegos, accesorios y consolas. Sistema completamente integrado compuesto por un **Frontend React Vite** y un **Backend Spring Boot (Java 21)** con base de datos relacional **MySQL 8.0 (puerto 3307)**, seguridad basada en roles mediante **Spring Security + JWT** y documentación interactiva con **OpenAPI / Swagger**.
 
 ---
 
 ## 👥 Integrantes del Equipo (Duoc UC)
-* **Cristián Carvajal** - Desarrollador Fullstack
-* **Sebastián Castillo** - Desarrollador Fullstack
+* **Cristián Carvajal**
+* **Sebastián Castillo**
 
 **Repositorio Frontend:** https://github.com/Criss-019/Level-Up-Gamer.git  
 **Repositorio Backend:** https://github.com/Criss-019/Level-Up-Gamer-Backend.git  
@@ -15,9 +15,9 @@ Plataforma de comercio electrónico de productos gamer, videojuegos, accesorios 
 
 ## 🚀 Arquitectura del Sistema
 
-* **Frontend:** React 19, React Router v7, Bootstrap 5, Vite, Vitest. Cliente HTTP centralizado (`api.js`) con inyección de cabecera `Authorization: Bearer <token>`.
-* **Backend:** Spring Boot 3.4 / Java 21, Spring Data JPA, Spring Security, JJWT 0.12.6, Springdoc OpenAPI (Swagger UI).
-* **Base de Datos:** MySQL / MariaDB (`jdbc:mysql://localhost:3306/level_up_gamer_db`) con script relacional exportable (`schema.sql`).
+* **Frontend:** React, React Router v7, Bootstrap 5, Vite, Vitest. Cliente HTTP centralizado (`api.js`) con inyección de cabecera `Authorization: Bearer <token>`.
+* **Backend:** Spring Boot 4.1.3 / Java 21, Spring Data JPA, Spring Security, JJWT 0.12.6, Springdoc OpenAPI (Swagger UI).
+* **Base de Datos:** MySQL / MariaDB (`jdbc:mysql://localhost:3307/level_up_gamer_db`) con script relacional exportable (`schema.sql`).
 * **Modelo Relacional (5 tablas):** `USUARIO` $\rightarrow$ `BOLETA` $\rightarrow$ `DETALLE_BOLETA` $\leftarrow$ `PRODUCTO` $\leftarrow$ `CATEGORIA`.
 
 ---
@@ -36,8 +36,8 @@ El sistema implementa control de acceso basado en roles (RBAC) tanto en Backend 
 
 ## 🛠️ Puesta en Marcha
 
-### 1. Iniciar el Backend (Spring Boot 3 + MySQL)
-1. Asegurarse de tener el servicio MySQL iniciado (ej. mediante XAMPP en puerto 3306).
+### 1. Iniciar el Backend (Spring Boot + MySQL)
+1. Asegurarse de tener el servicio MySQL iniciado (ej. mediante XAMPP en puerto 3307).
 2. Abrir terminal en la carpeta `level-up-gamer-backend`:
    ```bash
    cd "level-up-gamer-backend"
@@ -50,11 +50,9 @@ El sistema implementa control de acceso basado en roles (RBAC) tanto en Backend 
    ```
 4. El servidor iniciará en el puerto **8089**:
    * **Swagger UI:** http://localhost:8089/swagger-ui/index.html
-   * **Base de Datos:** MySQL `level_up_gamer_db` en `localhost:3306` (Usuario: `root`, Contraseña: vacía)
-   * **Swagger UI:** http://localhost:8089/swagger-ui/index.html
-   * **Consola H2:** http://localhost:8089/h2-console *(JDBC URL: `jdbc:h2:mem:testdb`, Usuario: `sa`, Contraseña: vacía)*
+   * **Base de Datos:** MySQL `level_up_gamer_db` en `localhost:3307` (Usuario: `root`, Contraseña: vacía)
 
-### 2. Iniciar el Frontend (React 19 + Vite)
+### 2. Iniciar el Frontend (React + Vite)
 1. Abrir terminal en la carpeta `Level-Up Gamer`:
    ```bash
    cd "Level-Up Gamer"
